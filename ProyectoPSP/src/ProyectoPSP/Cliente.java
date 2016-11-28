@@ -28,22 +28,22 @@ public class Cliente {
 
     public static final int puerto = 4444;
 
+
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws UnknownHostException, IOException {
+            InetAddress direccion = null;
+    Socket servidor = null;
+    DataInputStream dis = null;
+    DataOutputStream dos = null;
+        direccion = InetAddress.getLocalHost();
         int opcion = 0;
-        InetAddress direccion = InetAddress.getLocalHost();
-        Socket servidor = null;
-        DataInputStream dis = null;
-        DataOutputStream dos = null;
-        String rutaServidor = System.getProperty("user.home");
+                    servidor = new Socket(direccion, puerto);
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("La ruta por defecto es" + rutaServidor);
-        do {
-            servidor = new Socket(direccion, puerto);
-            dis = new DataInputStream(servidor.getInputStream());
+        while (opcion != 4) {
+
             dos = new DataOutputStream(servidor.getOutputStream());
             System.out.println("Selecciona lo que quieres hacer escribiendo el numero de la opcion:"
                     + "\n1. Listar"
@@ -61,6 +61,7 @@ public class Cliente {
                         dis = new DataInputStream(servidor.getInputStream());
                         System.out.println(dis.readUTF().toString());
                     }
+
                     break;
                 case 2:
                     Boolean rutaExiste = false;
@@ -76,7 +77,6 @@ public class Cliente {
                             // Obtenemos el tamaño del archivo            
                             int tamañoArchivo = (int) archivo.length();
                             //flujo de salida
-                            dos = new DataOutputStream(servidor.getOutputStream());
                             System.out.println("Enviando Archivo: " + archivo.getName());
                             // Enviamos el nombre del archivo             
                             dos.writeUTF(archivo.getName());
@@ -96,8 +96,6 @@ public class Cliente {
                                 bos.write(buffer[i]);
                             }
                             System.out.println("Archivo Enviado: " + archivo.getName());
-                            bis.close();
-                            bos.close();
                         } else {
                             System.out.println("No existe la ruta indicada");
                         }
@@ -125,8 +123,7 @@ public class Cliente {
                         // indicar donde guardaremos el archivo               
                         FileOutputStream fos = new FileOutputStream(rutaGuardado + "\\" + nombreArchivo);
                         //FileOutputStream fos = new FileOutputStream(rutaGuardado + "/" + nombreArchivo);
-                        
-                        
+
                         //Ruta donde se va a guardar el archivo
                         BufferedOutputStream out = new BufferedOutputStream(fos);
                         BufferedInputStream in = new BufferedInputStream(servidor.getInputStream());
@@ -140,21 +137,16 @@ public class Cliente {
                         out.write(buff);
                         // Cerramos flujos               
                         out.flush();
-                        in.close();
-                        out.close();
+
                     }
 
                     break;
-                default:
-                    break;
             }
-        servidor.close();
-        dis.close();
-        dos.close();
-        } while (!"4".equals(opcion));
-
-        
-
+           
+        }
+            servidor.close();
+            dis.close();
+            dos.close();
     }
 
 }
