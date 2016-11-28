@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class Servidor implements Runnable {
 
-    private String rutaServidor = System.getProperty("user.home");
+    private String rutaServidor = "C:\\Users\\9fad09\\Documents";
     private String rutaCliente = "";
     private Socket cliente;
     private static int puerto = 4444;
@@ -33,7 +33,7 @@ public class Servidor implements Runnable {
         this.cliente = cliente;
     }
 
-    public void listar(DataOutputStream dos) {
+    public void listar(DataOutputStream dos) throws IOException {
         File rutaDestino = new File(rutaServidor);
         // Array de ficheros/carpetas contenidos en el directorio
         File[] listaFicheros = rutaDestino.listFiles();
@@ -47,7 +47,6 @@ public class Servidor implements Runnable {
         } catch (IOException ex) {
             System.out.println("Algo fallo al listar");
         }
-
     }
 
     public void enviar(DataOutputStream dos, DataInputStream dis, BufferedInputStream bis, BufferedOutputStream bos) throws IOException {
@@ -109,23 +108,26 @@ public class Servidor implements Runnable {
 
         // Escribimos el archivo                
         out.write(buffer);
-        out.close();
-        in.close();
     }
 
     @Override
     public void run() {
-       
+
+        try {
+
             DataOutputStream dos = null;
             DataInputStream dis = null;
             BufferedOutputStream bos = null;
             BufferedInputStream bis = null;
+            dis = new DataInputStream(cliente.getInputStream());
+            dos = new DataOutputStream(cliente.getOutputStream());
             int opcion = 0;
             //Recibe un int con la opcion
-            do {
+            while (opcion != 4) {
                 try {
-                    dis = new DataInputStream(cliente.getInputStream());
                     dos = new DataOutputStream(cliente.getOutputStream());
+                    dis = new DataInputStream(cliente.getInputStream());
+
                     opcion = dis.readInt();
                     switch (opcion) {
                         case 1:
@@ -137,14 +139,12 @@ public class Servidor implements Runnable {
                         case 3:
                             enviar(dos, dis, bis, bos);
                             break;
-                        default:
-                            throw new AssertionError();
                     }
                 } catch (IOException ex) {
                     Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
-            } while (!"4".equals(opcion));
+            }
             try {
                 //Cerramos flujos
                 cliente.close();
@@ -156,7 +156,10 @@ public class Servidor implements Runnable {
                 Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
             }
 
+        } catch (IOException ex) {
+            Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
 
+}
